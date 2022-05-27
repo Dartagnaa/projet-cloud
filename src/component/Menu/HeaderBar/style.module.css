@@ -1,0 +1,12 @@
+.link{
+    color: black;
+    text-decoration:none;
+    font-family: cursive;
+    padding-right: 30px;
+    margin-bottom: 30px;
+}
+
+.div{
+    background-color: #FFE714;
+    padding-bottom: 15px;
+}

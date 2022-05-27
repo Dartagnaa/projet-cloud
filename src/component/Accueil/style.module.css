@@ -1,0 +1,17 @@
+.head{
+    text-align: center;
+    color: white;
+    background: black;
+}
+
+.center {
+    text-align: center;
+}
+
+.main{
+    background-color: #FFFEE8;
+}
+
+.p{
+    margin-left: 10px;
+}
