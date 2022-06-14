@@ -71,7 +71,7 @@ var MyScore = {
     loadList: function() {
         return m.request({
             method: "GET",
-            url: "_ah/api/myApi/v1/pion"
+            url: "_ah/api/myApi/v1/getPetition"
         })
         .then(function(result) {
             console.log(result)
