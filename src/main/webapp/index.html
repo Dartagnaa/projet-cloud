@@ -68,10 +68,13 @@ Be sure you loaded this page with "https://"
   <script>
 var MyScore = {
     list: [],
+    titre:"",
+    description:"",
+    categorie:"",
     loadList: function() {
         return m.request({
             method: "GET",
-            url: "_ah/api/myApi/v1/getPetition"
+            url: "_ah/api/myApi/v1/getPetitions"
         })
         .then(function(result) {
             console.log(result)
@@ -79,12 +82,11 @@ var MyScore = {
     },
     savePetiton: function() {
         console.log("save")
-        
-           var data = {
-                titre: "Petition 1",
-                description: "Desc peee",
-                categorie: "cat 1"
-            }
+        const data = {
+                  titre: this.titre,
+                  description: this.description,
+                  categorie: this.categorie
+              }
             console.log(data)
 	        return m.request({
 	            method: "post",
@@ -108,12 +110,58 @@ var essai = {
         }, "clique2")
     }
 }
+
+var createPetitionForm = {
+        view: function() {
+            return m("div",{style: "margin-top: 50px"}, [
+            m("h5", {class: "text text-center"}, "Creation d'une petition"), 
+            m("form",{
+                onsubmit: function(e) {
+		        e.preventDefault()
+		       MyScore.savePetiton()
+		      }
+            }, [
+            m("div", {class: "row"}, [
+                m("div", {class: "col-6"}, [
+                      m("label.label",{class: "col-form-label"},"* Titre de la petition"),
+                      m("input.input[placeholder=Titre]", {class: "form-control",
+                      oninput: function (e) {
+                       MyScore.titre = e.target.value
+                    }
+                 }),
+                ]),
+            ]),  
+             m("div", {class: "row"}, [
+                 m("div", {class: "col-6"}, [
+                     m("label.label", {class: "col-form-label"},"* Categorie"),
+                     m("input.input[placeholder=Categorie]", {class: "form-control",
+                     oninput: function (e) {
+                        MyScore.categorie = e.target.value
+                     }
+                    }), 
+                ]),
+            ]),   
+            m("label.label",{class: "col-form-label"}, "* Description"),
+            m("textarea[placeholder=Description de la petition]", {class: "form-control",
+            oninput: function (e) {
+                MyScore.description = e.target.value
+            },
+             rows: "5"
+            }),
+            m("button.button[type=submit]",{class: "btn btn-success", style: "margin-top: 10px"}, "Lancer"),
+        ])
+            ])
+           
+            }
+        }
+
 var titre = {
     view: function() {
         return m("div", {class: "container", id: "idi"}, [
             m("h1","hello"),
             m("p","coucou"),
-            m(essai)
+            m(essai),
+            m(createPetitionForm)
         ])
     }
 }

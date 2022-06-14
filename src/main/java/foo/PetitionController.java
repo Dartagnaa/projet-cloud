@@ -47,15 +47,78 @@ import com.google.appengine.api.datastore.Transaction;
 
 public class PetitionController {
 
-	@ApiMethod(name = "getPetition", httpMethod = HttpMethod.GET)
-	public List<Entity> pion() {
-		Query q = new Query("test");
+	@ApiMethod(name = "getPetitions", httpMethod = HttpMethod.GET)
+	public List<Entity> getPetitions() {
+		Query q = new Query("petition");
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
 		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
 		return result;
 	}
+
+    @ApiMethod(name = "postPetition", httpMethod = HttpMethod.POST)
+	public Entity postPetition(Petition p) {
+
+		Entity e = new Entity("petition"); // quelle est la clef ?? non specifié -> clef automatique
+		e.setProperty("categorie", p.categorie);
+		e.setProperty("description", p.description);
+		e.setProperty("titre", p.titre);
+        e.setProperty("user", "Malo");
+        e.setProperty("nbSignature",0);
+		
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		datastore.put(e);
+		return e;
+	}
+
+    @ApiMethod(name = "getPetitionsByCategorie", httpMethod = HttpMethod.GET)
+	public List<Entity> getPetitionsByCategorie(String categorie) {
+		Filter keyFilter = new FilterPredicate("categorie", FilterOperator.EQUAL,categorie);
+        Query q = new Query("petition").setFilter(keyFilter);
+
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		PreparedQuery pq = datastore.prepare(q);
+		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
+		return result;
+	}
+
+    @ApiMethod(name = "getPetitionsByUser", httpMethod = HttpMethod.GET)
+	public List<Entity> getPetitionsByUser(String user) {
+		Filter keyFilter = new FilterPredicate("user", FilterOperator.EQUAL,user);
+        Query q = new Query("petition").setFilter(keyFilter);
+
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		PreparedQuery pq = datastore.prepare(q);
+		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
+		return result;
+	}
+
+    @ApiMethod(name = "getPetitionsTop100", httpMethod = HttpMethod.GET)
+	public List<Entity> getPetitionsTop100() {
+
+        Query q = new Query("petition").addSort("nbSignature", SortDirection.DESCENDING).addSort("date", SortDirection.ASCENDING);        
+
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		PreparedQuery pq = datastore.prepare(q);
+		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
+		return result;
+	}
+
+    /*
+    @ApiMethod(name = "signerPetition", httpMethod = HttpMethod.POST)
+	public Entity signerPetition(String id) {
+
+        Query q = new Query("petition").setFilter(new FilterPredicate("__key__", FilterOperator.EQUAL, id));
+        PreparedQuery pq = datastore.prepare(q);
+        Entity majPet = pq.asSingleEntity();
+
+        majPet.setProperty("nbSignature",majPet.nbSignature+1);
+		
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		datastore.put(e);
+		return e;
+	}*/
 
 	@ApiMethod(name = "topscores", httpMethod = HttpMethod.GET)
 	public List<Entity> topscores() {
@@ -65,21 +128,6 @@ public class PetitionController {
 		PreparedQuery pq = datastore.prepare(q);
 		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(10));
 		return result;
-	}
-
-	@ApiMethod(name = "postPetition", httpMethod = HttpMethod.POST)
-	public Entity postPetition(Petition p) {
-
-		Entity e = new Entity("test"); // quelle est la clef ?? non specifié -> clef automatique
-		e.setProperty("categorie", p.categorie);
-		e.setProperty("description", p.description);
-		e.setProperty("titre", p.titre);
-        e.setProperty("user", "Thierno");
-		
-
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		datastore.put(e);
-		return e;
 	}
 
     

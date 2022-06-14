@@ -7,8 +7,7 @@ public class Petition {
 	public String description;
 	public String titre;
     public String user;
-    public Date date;
-    public Int nbSignature;
+    public int nbSignature;
 	
 	public Petition() {}
 }
