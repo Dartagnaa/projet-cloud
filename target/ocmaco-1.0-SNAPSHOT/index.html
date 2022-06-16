@@ -89,6 +89,19 @@ var MyScore = {
             console.log(result)
         })
     },
+    test: function() {
+        var param = {
+                user: "Coco"
+            }
+        return m.request({
+            method: "GET",
+            url: "_ah/api/myApi/v1/User",
+            params: param
+        })
+        .then(function(result) {
+            console.log(result)
+        })
+    },
     savePetiton: function() {
         console.log("save")
         
@@ -124,7 +137,7 @@ var MyScore = {
                 MyScore.top()
 	        })
               
-	    }
+	}
       
 }
 var essai = {
@@ -134,6 +147,15 @@ var essai = {
                 MyScore.savePetiton()
             }
         }, "clique1")
+    }
+}
+var test = {
+    view: function() {
+        return m("button", {
+            onclick: function(e) {
+                MyScore.test()
+            }
+        }, "test")
     }
 }
 var createPetitionForm = {
@@ -185,7 +207,8 @@ var titre = {
             m("h1","hello"),
             m("p","coucou"),
             m(essai),
-            m(createPetitionForm)
+            m(createPetitionForm),
+            m(test)
         ])
     }
 }

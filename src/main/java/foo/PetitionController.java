@@ -66,6 +66,28 @@ public class PetitionController {
 		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
 		return result;
 	}
+    
+    @ApiMethod(name = "Categorie", httpMethod = HttpMethod.GET)
+	public List<Entity> Categorie(Petition p) {
+		Filter keyFilter = new FilterPredicate("categorie", FilterOperator.EQUAL,p.categorie);
+        Query q = new Query("test").setFilter(keyFilter);
+
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		PreparedQuery pq = datastore.prepare(q);
+		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
+		return result;
+	}
+
+    @ApiMethod(name = "User", httpMethod = HttpMethod.GET)
+	public List<Entity> User(Petition p) {
+		Filter keyFilter = new FilterPredicate("user", FilterOperator.EQUAL,p.user);
+        Query q = new Query("test").setFilter(keyFilter);
+
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		PreparedQuery pq = datastore.prepare(q);
+		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
+		return result;
+	}
 
 	@ApiMethod(name = "topscores", httpMethod = HttpMethod.GET)
 	public List<Entity> topscores() {
@@ -84,7 +106,7 @@ public class PetitionController {
 		e.setProperty("categorie", p.categorie);
 		e.setProperty("description", p.description);
 		e.setProperty("titre", p.titre);
-        e.setProperty("user", "Thierno");
+        e.setProperty("user", "Coco");
         e.setProperty("nbsignatures", p.nbsignatures);
 		
 
