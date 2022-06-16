@@ -1,0 +1,256 @@
+{
+ "swagger": "2.0",
+ "info": {
+  "version": "1.0.0",
+  "title": "ocmaco.appspot.com"
+ },
+ "host": "ocmaco.appspot.com",
+ "basePath": "/_ah/api",
+ "schemes": [
+  "https"
+ ],
+ "consumes": [
+  "application/json"
+ ],
+ "produces": [
+  "application/json"
+ ],
+ "paths": {
+  "/myApi/v1/collectionresponse_entity": {
+   "get": {
+    "operationId": "MyApiGetPost",
+    "parameters": [
+     {
+      "name": "next",
+      "in": "query",
+      "required": false,
+      "type": "string"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "A successful response",
+      "schema": {
+       "$ref": "#/definitions/CollectionResponse_Entity"
+      }
+     }
+    },
+    "security": [
+     {
+      "google_id_token-c0cb64c6": [ ]
+     },
+     {
+      "google_id_token_https-c0cb64c6": [ ]
+     }
+    ]
+   }
+  },
+  "/myApi/v1/pion": {
+   "get": {
+    "operationId": "MyApiPion",
+    "parameters": [ ],
+    "responses": {
+     "200": {
+      "description": "A successful response",
+      "schema": {
+       "$ref": "#/definitions/EntityCollection"
+      }
+     }
+    },
+    "security": [
+     {
+      "google_id_token-c0cb64c6": [ ]
+     },
+     {
+      "google_id_token_https-c0cb64c6": [ ]
+     }
+    ]
+   }
+  },
+  "/myApi/v1/postPetition": {
+   "post": {
+    "operationId": "MyApiPostPetition",
+    "parameters": [
+     {
+      "in": "body",
+      "name": "body",
+      "required": false,
+      "schema": {
+       "$ref": "#/definitions/Petition"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "A successful response",
+      "schema": {
+       "$ref": "#/definitions/Entity"
+      }
+     }
+    },
+    "security": [
+     {
+      "google_id_token-c0cb64c6": [ ]
+     },
+     {
+      "google_id_token_https-c0cb64c6": [ ]
+     }
+    ]
+   }
+  },
+  "/myApi/v1/topscores": {
+   "get": {
+    "operationId": "MyApiTopscores",
+    "parameters": [ ],
+    "responses": {
+     "200": {
+      "description": "A successful response",
+      "schema": {
+       "$ref": "#/definitions/EntityCollection"
+      }
+     }
+    },
+    "security": [
+     {
+      "google_id_token-c0cb64c6": [ ]
+     },
+     {
+      "google_id_token_https-c0cb64c6": [ ]
+     }
+    ]
+   }
+  }
+ },
+ "securityDefinitions": {
+  "google_id_token-c0cb64c6": {
+   "type": "oauth2",
+   "authorizationUrl": "",
+   "flow": "implicit",
+   "x-google-issuer": "accounts.google.com",
+   "x-google-jwks_uri": "https://www.googleapis.com/oauth2/v1/certs",
+   "x-google-audiences": "448601331771-9pfrlvj1pgcnr8jdsrsil9c0bjcbpq92.apps.googleusercontent.com"
+  },
+  "google_id_token_https-c0cb64c6": {
+   "type": "oauth2",
+   "authorizationUrl": "",
+   "flow": "implicit",
+   "x-google-issuer": "https://accounts.google.com",
+   "x-google-jwks_uri": "https://www.googleapis.com/oauth2/v1/certs",
+   "x-google-audiences": "448601331771-9pfrlvj1pgcnr8jdsrsil9c0bjcbpq92.apps.googleusercontent.com"
+  }
+ },
+ "definitions": {
+  "_any": {
+   "type": "object"
+  },
+  "Entity": {
+   "type": "object",
+   "properties": {
+    "appId": {
+     "type": "string"
+    },
+    "key": {
+     "$ref": "#/definitions/Key"
+    },
+    "kind": {
+     "type": "string"
+    },
+    "namespace": {
+     "type": "string"
+    },
+    "parent": {
+     "$ref": "#/definitions/Key"
+    },
+    "properties": {
+     "$ref": "#/definitions/Map_String_Object"
+    },
+    "propertiesFrom": {
+     "$ref": "#/definitions/Entity"
+    }
+   }
+  },
+  "CollectionResponse_Entity": {
+   "type": "object",
+   "properties": {
+    "items": {
+     "type": "array",
+     "items": {
+      "$ref": "#/definitions/Entity"
+     }
+    },
+    "nextPageToken": {
+     "type": "string"
+    }
+   }
+  },
+  "EntityCollection": {
+   "type": "object",
+   "properties": {
+    "items": {
+     "type": "array",
+     "items": {
+      "$ref": "#/definitions/Entity"
+     }
+    }
+   }
+  },
+  "Map_String_Object": {
+   "type": "object",
+   "additionalProperties": {
+    "$ref": "#/definitions/_any"
+   }
+  },
+  "Petition": {
+   "type": "object",
+   "properties": {
+    "categorie": {
+     "type": "string"
+    },
+    "date": {
+     "type": "string",
+     "format": "date-time"
+    },
+    "description": {
+     "type": "string"
+    },
+    "nbSignature": {
+     "type": "integer",
+     "format": "int32"
+    },
+    "titre": {
+     "type": "string"
+    },
+    "user": {
+     "type": "string"
+    }
+   }
+  },
+  "Key": {
+   "type": "object",
+   "properties": {
+    "appId": {
+     "type": "string"
+    },
+    "complete": {
+     "type": "boolean"
+    },
+    "id": {
+     "type": "integer",
+     "format": "int64"
+    },
+    "kind": {
+     "type": "string"
+    },
+    "name": {
+     "type": "string"
+    },
+    "namespace": {
+     "type": "string"
+    },
+    "parent": {
+     "$ref": "#/definitions/Key"
+    }
+   }
+  }
+ }
+}

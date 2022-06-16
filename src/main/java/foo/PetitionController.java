@@ -47,9 +47,19 @@ import com.google.appengine.api.datastore.Transaction;
 
 public class PetitionController {
 
-	@ApiMethod(name = "getPetition", httpMethod = HttpMethod.GET)
-	public List<Entity> pion() {
+	@ApiMethod(name = "petitions", httpMethod = HttpMethod.GET)
+	public List<Entity> petitions() {
 		Query q = new Query("test");
+
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		PreparedQuery pq = datastore.prepare(q);
+		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
+		return result;
+	}
+
+    @ApiMethod(name = "top", httpMethod = HttpMethod.GET)
+	public List<Entity> top() {
+		Query q = new Query("test").addSort("nbsignatures", SortDirection.DESCENDING);;
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
@@ -75,6 +85,7 @@ public class PetitionController {
 		e.setProperty("description", p.description);
 		e.setProperty("titre", p.titre);
         e.setProperty("user", "Thierno");
+        e.setProperty("nbsignatures", p.nbsignatures);
 		
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
