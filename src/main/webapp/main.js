@@ -1,54 +1,265 @@
+const baseEndpointURL = "https://ocmaco.ew.r.appspot.com/glogin.html/_ah/api/myApi/v1/";
 
-// Code goes here
-
-
-// Code goes here
-
-var MyApp = (function (superclass) {
-  function MyApp(props) {
-    superclass.call(this, props);
-
-    this.state = {
-      data: [],
-    };
+const EndpointURL = {
+  login: {
+    method: "post",
+    url: baseEndpointURL + "login"
+  },
+  addPost: {
+    method: "post",
+    url: baseEndpointURL + "addPost"
+  },
+  newPosts: {
+    method: "get",
+    url: baseEndpointURL + "posts"
+  },
+  likePost: {
+    method: "post",
+    url: baseEndpointURL + "like"
+  },
+  getUserInfos: {
+    method: "get",
+    url: baseEndpointURL + "user/{userEmail}"
+  },
+  getUserPosts: {
+    method: "get",
+    url: baseEndpointURL + "user/{userEmail}/posts"
+  },
+  getPost: {
+    method: "get",
+    url: baseEndpointURL + "post/{postId}"
   }
+}
 
-  if ( superclass ) MyApp.__proto__ = superclass;
-  MyApp.prototype = Object.create( superclass && superclass.prototype );
-  MyApp.prototype.constructor = MyApp;
+/**
+ * classe regroupant les actions opérables par un utilisateur
+ */
+const User = {
+  login: (googleUser) => {
+    var profile = googleUser.getBasicProfile();
+    
+    const user = {
+        email: profile.getEmail(),
+        name: profile.getName(),
+        url: profile.getImageUrl()
+    };
+    
+    sessionStorage.setItem("user", JSON.stringify(user));
+    
+    axios[EndpointURL.login.method](EndpointURL.login.url, user)
+        .then(e => window.location = "/")
+        .catch(e => {
+            console.log(e);
+            alert("Erreur lors de l'enregistrement de l'utilisateur");
+        })
+  },
 
-  MyApp.prototype.componentDidMount = function componentDidMount () {
-    var this$1 = this;
+  logout: () => {
+    gapi.load('auth2', function() {
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut()
+        .then(() => {
+          alert("Déconnexion");
+          sessionStorage.clear();
+          window.location = "";
+        })
+        .catch(e => {
+          alert("Erreur lors de la déconnexion");
+          console.log(e);
+        });
+    });
+  },
 
-    fetch('_ah/api/myApi/v1/scores')
-      .then(function (response) { return response.json(); })
-      .then(function (data) { return this$1.setState({  data : data.items }); });
-  };
-  MyApp.prototype.render = function render () {
-    return React.createElement( 'ul', null, this.state.data.map(function (e) { return React.createElement( 'li', null, " ", e.properties.name, " ", e.properties.score, " " ); }), "  " );
-  };
+  /**
+   * Fonction de like d'un post
+   * @param {string} postId
+   * @param  {string} userEmail
+   */
+  likePost: (postId) => {
+    axios[EndpointURL.likePost.method](EndpointURL.likePost.url, {postId, userEmail: JSON.parse(sessionStorage.getItem("user")).email})
+        .then(e => {
+            View.updateLikeCount(postId.replace(/\_/g, " "))
+        })
+        .catch(error => {
+            console.log(error);
+            alert("Erreur lors du like")
+        });
+  },
 
+  makePost: () => {
+    const url = document.getElementById("imageURL").value;
+    const body = document.getElementById("description").value;
+
+    if (!url || !body) {
+        alert("Veuillez remplir tous les champs.");
+        return null;
+    }
+
+    // Récupérer l'owner depuis le sessionStorage
+    const owner = JSON.parse(sessionStorage.getItem("user")).email;
+
+    axios[EndpointURL.addPost.method](EndpointURL.addPost.url, {owner, url, body})
+        .then(e => {
+            alert("Post ajouté avec succès");
+            window.location = "/";
+        })
+        .catch(error => {
+            console.log(error);
+            alert("Erreur lors de la publication")
+        });
+  },
+
+  getUserInfos: () => {
+    axios[EndpointURL.getUserInfos.method](EndpointURL.getUserInfos.url.replace("{userEmail}", email))
+        .then(e => {
+            console.log(e);
+        })
+        .catch(error => {
+            console.log(error);
+            alert("Erreur récupération informations utilisateur")
+        });
+  },
+
+  follow: (email) => {
+    axios[EndpointURL.follow.method](EndpointURL.follow.url, {follower:JSON.parse(sessionStorage.getItem("user")).email, followee: email})
+        .then(e => {
+            alert("Vous suivez : " + email);
+        })
+        .catch(error => {
+            console.log(error);
+            alert("Erreur récupération informations utilisateur")
+        });
+  }
+}
+
+const View = {
+  listNewPosts : () => {
+      axios[EndpointURL.newPosts.method](EndpointURL.newPosts.url)
+        .then(e => {
+            document.getElementById("new-posts").innerHTML = e.data.items.map(item => View.createPostView(item.properties)).join("");
+            async () => {
+                for (const item of e.data.items) {
+                    axios[EndpointURL.getUserInfos.method]([Endpoint.getUserInfos.url].replace("{userEmail}", item.properties.owner))
+                        .then(e => document.getElementById(postData.id.replace(/ /g, "-") + "-userImage").src = e.data.items[0].properties.url)
+                }
+            }
+        })
+        .catch (e => {
+            console.log(error);
+            alert("Erreur chargement des derniers Posts")
+        })
+  },
+
+  createPostView : (postData) => {
+    return (
+      `<div class="w-full mb-2 border pb-4">
+          <!-- Informations utilisateur -->
+          <div class="flex text-left items-center m-2">
+              <label class="mr-2 font-bold">${postData.owner}</label>
+              <label class="text-blue-400 cursor-pointer hover:text-blue-600" onclick="User.follow('${postData.owner}')">• S'abonner</label>
+          </div>
+          
+          <!-- Image de la publication -->
+          <img src=${postData.url} alt="image" class="w-full mb-2 shadow">
+          <!-- Nombre de likes -->
+          <div class="text-gray-600 text-left font-bold m-2 mb-4 flex items-center">
+              <label class="flex-grow">
+                <label id=${postData.id.replace(/ /g, "_") + "-likeCount"}>
+                    ${postData.likeCount}
+                </label>
+                J'aime
+              </label>
+              
+              <label>${formatDate(postData.date)}</label>
+          </div>
+          
+          <!-- Texte de la publication -->
+          <div class="text-gray-600 text-left m-2 mb-4">
+              <label>${postData.body}</label>
+          </div>
+          
+          <!-- J'aime -->
+          <div class="text-center">
+              <label
+                class="rounded shadow text-gray-500 p-2 cursor-pointer font-medium hover:border hover:text-red-500 duration-100 ease-in-out"
+                onclick="User.likePost('${postData.id}')"
+              >
+                ♥ J'aime
+              </label>
+          </div>
+      </div>`
+    );
+  },
+
+  listUserNewPosts : () => {
+    axios[EndpointURL.getUserPosts.method](EndpointURL.getUserPosts.url.replace("{userEmail}", JSON.parse(sessionStorage.getItem("user")).email))
+      .then(e => {
+          document.getElementById("new-posts").innerHTML = e.data.items.map(item => View.createUserPostView(item.properties)).join("");
+      })
+      .catch (e => {
+          console.log(error);
+          alert("Erreur chargement des derniers Posts")
+      });
+  },
+
+  createUserPostView : (postData) => {
+    return (
+      `<div class="w-full mb-2 border pb-4">          
+          <!-- Image de la publication -->
+          <img src=${postData.url} alt="image" class="w-full mb-2 shadow">
+          <!-- Nombre de likes -->
+          <div class="text-gray-600 text-left font-bold m-2 mb-4 flex items-center">
+              <label class="flex-grow">
+                <label id=${postData.id.replace(/ /g, "_") + "-likeCount"}>
+                    ${postData.likeCount}
+                </label>
+                J'aime
+              </label>
+              
+              <label>${formatDate(postData.date)}</label>
+          </div>
+          
+          <!-- Texte de la publication -->
+          <div class="text-gray-600 text-left m-2 mb-4">
+              <label>${postData.body}</label>
+          </div>
+          
+          <!-- J'aime -->
+          <div class="text-center">
+              <label
+                class="rounded shadow text-gray-500 p-2 cursor-pointer font-medium hover:border hover:text-red-500 duration-100 ease-in-out"
+                onclick="User.likePost('${postData.id}')"
+              >
+                ♥ J'aime
+              </label>
+          </div>
+      </div>`
+    );
+  },
   
-//written in JSX...
-//  XomponentDidMount() {
-//	    fetch('https://sobike44.appspot.com/_ah/api/myApi/v1/scores')
-//	      .then(response => response.json())
-//	      .then(data => this.setState({  data : data.items }));
-//	  }
-//	  render() {
-//	    return <ul>{this.state.data.map(e => <li> {e.properties.name} {e.properties.score} </li>)}  </ul>;
-//	  }
-//	}
-  
-  
-  return MyApp;
-}(React.Component));
+  updateLikeCount: (postId) => {
+    axios[EndpointURL.getPost.method](EndpointURL.getPost.url.replace("{postId}", postId))
+        .then(e => {
+            document.getElementById(postId.replace(/ /g, "_") + "-likeCount").innerHTML = e.data.properties.likeCount
+        });
+  }
+}
 
-ReactDOM.render(
-React.createElement('div', null,
-    React.createElement(MyApp)
-  )
-,
-  document.getElementById('app')
-);
+function isUserConnected() {
+    return Boolean(sessionStorage.getItem("user"));
+}
 
+function formatDate(date) {
+    date = date.split(" ")[0].split("-");
+    return [date[2], date[1], date[0]].join("/");
+}
+
+// // Si l'utilisateur n'est pas connecté
+if (!isUserConnected() && window.location.pathname !== "/glogin.html") {
+    window.location = "/glogin.html";
+}
+
+// // Chargement automatique des derniers posts sur la page d'accueil
+if ("/home.html".includes(window.location.pathname) && isUserConnected()) {
+    View.listNewPosts();
+}
