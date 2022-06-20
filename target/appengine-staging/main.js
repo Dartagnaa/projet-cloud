@@ -41,17 +41,16 @@ const User = {
     const user = {
         email: profile.getEmail(),
         name: profile.getName(),
-        url: profile.getImageUrl()
     };
+    console.log(user);
     
     sessionStorage.setItem("user", JSON.stringify(user));
     
-    axios[EndpointURL.login.method](EndpointURL.login.url, user)
-        .then(e => window.location = "/")
-        .catch(e => {
-            console.log(e);
-            alert("Erreur lors de l'enregistrement de l'utilisateur");
-        })
+    return m.request({
+        method: "post",
+        url: "_ah/api/myApi/v1/postUser",
+        params: user
+    })
   },
 
   logout: () => {
@@ -256,6 +255,7 @@ function formatDate(date) {
 
 // // Si l'utilisateur n'est pas connecté
 if (!isUserConnected() && window.location.pathname !== "/glogin.html") {
+    console.log("oui1");
     window.location = "/glogin.html";
 }
 

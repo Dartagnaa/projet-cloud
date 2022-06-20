@@ -2,25 +2,18 @@
   <head>
     <meta name="google-signin-scope" content="profile email">
     <meta name="google-signin-client_id" content="448601331771-9pfrlvj1pgcnr8jdsrsil9c0bjcbpq92.apps.googleusercontent.com">
+    <meta name="google-signin-plugin_name" content="stop bugging me">
     <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/mithril/mithril.js"></script>
   </head>
   
 <body class="bg-gray-100">
+    <script src="main.js" defer></script>
     <script defer>
         function onSignIn(googleUser) {
-            // Useful data for your client-side scripts:
-            var profile = googleUser.getBasicProfile();
-            console.log("ID: " + profile.getId()); // Don't send this directly to your server!
-            console.log('Full Name: ' + profile.getName());
-            console.log('Given Name: ' + profile.getGivenName());
-            console.log('Family Name: ' + profile.getFamilyName());
-            console.log("Image URL: " + profile.getImageUrl());
-            console.log("Email: " + profile.getEmail());
-
-            // The ID token you need to pass to your backend:
-            var id_token = googleUser.getAuthResponse().id_token;
-            console.log("ID Token: " + id_token);
-      }
+          User.login(googleUser);
+        }
   
         function signOut() {
           User.logout();
@@ -55,7 +48,7 @@
               <div class="flex-grow"></div>
             </div>
             
-            <div class="text-gray-600 text-xl text-center mb-4">Connexion avec Google</div>
+            <div class="text-gray-600 text-xl text-center mb-4">Connexion avec Gooogle</div>
             
             <!-- Bouton Google -->
             <div class="flex mb-4">

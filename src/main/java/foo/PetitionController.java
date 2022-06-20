@@ -115,6 +115,20 @@ public class PetitionController {
 		return e;
 	}
 
+    @ApiMethod(name = "postUser", httpMethod = HttpMethod.POST)
+	public Entity postUser(UserClass u) {
+
+		Entity e = new Entity("user"); // quelle est la clef ?? non specifié -> clef automatique
+		e.setProperty("name", u.name);
+		e.setProperty("email", u.email);
+        e.setProperty("signed", "");
+		
+
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		datastore.put(e);
+		return e;
+	}
+
     
 	@ApiMethod(name = "getPost",
 		   httpMethod = ApiMethod.HttpMethod.GET)
