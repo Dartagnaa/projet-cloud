@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type"
 	content="application/xhtml+xml; charset=UTF-8" />
-<title>OCMACO pétitions</title>
+<title>OCMACO</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
 <script src="https://unpkg.com/mithril/mithril.js"></script>
 </head>
@@ -71,7 +71,7 @@ var MyScore = {
     loadList: function() {
         return m.request({
             method: "GET",
-            url: "_ah/api/myApi/v1/getPetition"
+            url: "_ah/api/myApi/v1/getP"
         })
         .then(function(result) {
             console.log(result)
@@ -112,7 +112,7 @@ var titre = {
     view: function() {
         return m("div", {class: "container", id: "idi"}, [
             m("h1","hello"),
-            m("p","coucou"),
+            m("p","coucou 2"),
             m(essai)
         ])
     }
