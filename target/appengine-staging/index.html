@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <meta http-equiv="content-type"
+            content="application/xhtml+xml; charset=UTF-8" />
+        <title>OCMACO pétitions</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+        <script src="https://unpkg.com/mithril/mithril.js"></script>
+    </head>
+    <body>
+        <script src="main.js" defer></script>
+        <script>
+            var Variable = {
+                petitions: [],
+                toppetitions : [],
+                list: [],
+                titre:"",
+                description:"",
+                categorie:"",
+                loadList: function() {
+                    return m.request({
+                        method: "GET",
+                        url: "_ah/api/myApi/v1/petitions"
+                    })
+                    .then(function(result) {
+                        Variable.petitions = result.items
+                        console.log(result)
+                    })
+                },
+                top: function() {
+                    return m.request({
+                        method: "GET",
+                        url: "_ah/api/myApi/v1/top"
+                    })
+                    .then(function(result) {
+                        Variable.toppetitions = result.items
+                        console.log(result)
+                    })
+                },
+                savePetiton: function() {
+                    var data = {
+                        titre: Variable.titre,
+                        description: Variable.description,
+                        categorie: Variable.categorie,
+                        nbsignatures: 0
+                    }
+                    return m.request({
+                        method: "post",
+                        url: "_ah/api/myApi/v1/postPetition",
+                        params: data
+                    })
+                    .then(function(result) {
+                        console.log(result)
+                        Variable.loadList()
+                    })
+                        
+                }
+                
+            }
+
+            //Menu
+            var navBar = {
+                view: function() {
+                    return m('nav', {class: "navbar navbar-expand-lg", style:"background-color: #F9E5BB"}, [
+                        m('div', {class: "container-fluid"}, [
+                            m('div', {class: "collapse navbar-collapse", id: "navbarColor03"}, [
+                                m('ul', {class: "navbar-nav me-auto"}, [
+                                    m('li', {class: "nav-item"}, [
+                                        m(m.route.Link, {href: "/", class: "nav-link"}, "Accueil")
+                                    ]),
+                                    m('li', {class: "nav-item "}, [
+                                        m(m.route.Link, {href: "/create_petition", class: "nav-link"}, "Créer une petition")
+                                    ]),
+                                    m('li', {class: "nav-item "}, [
+                                        m(m.route.Link, {href: "/top", class: "nav-link"}, "Top pétitions")
+                                    ])
+                                ])
+                            ])    
+                        ])    
+                    ])
+                }
+            }
+
+            var essai = {
+                view: function() {
+                    return m("button", {
+                        onclick: function(e) {
+                            m("p","coucou")
+                        }
+                    }, "clique1")
+                }
+            }
+
+            //Affiche les pétitions sous forme de card
+            var listePetitions = {
+                oninit: Variable.loadList(),
+                view: function () {
+                    return m("div",  Variable.petitions.map(function (item) {
+                        return m("div", {class: "row", style: "margin-top: 25px"},[
+                            m("div",{class: "card col-6 offset-3"}, [
+                                m("div", {class: "row"}, [
+                                    m("div", {class: "col-9"}, [
+                                        m("h5", {class: "text-justify"}, item.properties.titre),
+                                        m("p",{class: "text-justify"},item.properties.categorie) 
+                                    ])
+                                ])
+                            ])
+                        ])
+                    }))      
+                }
+            }
+
+            //Liste les petitions avec le plus de signature sous forme de card
+            var listePetitionsTop = {
+                oninit: Variable.top(),
+                view: function () {
+                    return m("div",  Variable.toppetitions.map(function (item) {
+                        return m("div", {class: "row", style: "margin-top: 25px"},[
+                            m("div",{class: "card col-6 offset-3"}, [
+                                m("div", {class: "row"}, [
+                                    m("div", {class: "col-9"}, [
+                                        m("h5", {class: "text-justify"}, item.properties.titre),
+                                        m("p",{class: "text-justify"},item.properties.categorie) 
+                                    ])
+                                ])
+                            ])
+                        ])
+                    }))      
+                }
+            }
+
+            //Formulaire pour créer une pétition
+            var formPetition = {
+                view: function() {
+                    return m("div", [
+                        m(navBar),
+                        m("br"),
+                        m("h3", {class: "text text-center"}, "Lancer une petition"), 
+                        m("form",{
+                            style: "margin: 50px",
+                            onsubmit: function(e) {
+                            e.preventDefault()
+                            Variable.savePetiton()
+                        }
+                        }, [
+                            m("div", {class: "row"}, [
+                                m("div", {class: "col-6"}, [
+                                    m("label.label",{class: "col-form-label"},"* Titre de la petition"),
+                                    m("input.input[placeholder=Titre]", {class: "form-control",
+                                        oninput: function (e) {
+                                            Variable.titre = e.target.value
+                                        }
+                                    }),
+                                ]),
+                            ]),  
+                            m("div", {class: "row"}, [
+                                m("div", {class: "col-6"}, [
+                                    m("label.label", {class: "col-form-label"},"* Categorie"),
+                                    m("input.input[placeholder=Categorie]", {class: "form-control",
+                                        oninput: function (e) {
+                                            Variable.categorie = e.target.value
+                                        }
+                                    }), 
+                                ]),
+                            ]),   
+                            m("label.label",{class: "col-form-label"}, "* Description"),
+                            m("textarea[placeholder=Description de la petition]", {class: "form-control",
+                                oninput: function (e) {
+                                    Variable.description = e.target.value
+                                },
+                                rows: "5"
+                            }),
+                            m("button.button[type=submit]",{class: "btn btn-success", style: "margin-top: 10px"}, "Lancer"),
+                        ])
+                    ])
+                        
+                }
+            }
+
+            //Page d'accueil qui liste les pétitions
+            var pageAccueil = {
+                view: function() {
+                    return m("div", [
+                        m(navBar),
+                        m("div", {style: "margin: 5px"}, [
+                        m("h3",{style:"text-align:center"},"Bienvenue sur OCMACO"),
+                        m("br"),
+                        m("p",{style:"text-align:center"},"Vous retrouvez ici toutes les pétitions qui nous tiennent à coeur. Vous pouvez les visualiser et les signer."),
+                        m("br"),
+                        m(listePetitions)])
+                    ])
+                }
+            }
+
+            //Page des top pétitions
+            var topPetition = {
+                view: function() {
+                    return m("div", [
+                        m(navBar),
+                        m("div", {style: "margin: 5px"}, [
+                        m("h3",{style:"text-align:center"},"TOP pétitions"),
+                        m("br"),
+                        m("p",{style:"text-align:center"},"Voici les pétitions qui ont reçu le plus de signatures."),
+                        m("br"),
+                        m(listePetitionsTop)])
+                    ])
+                }
+            }
+
+            m.route(document.body, "/", {
+                "/": pageAccueil,
+                "/create_petition": formPetition,
+                "/top":topPetition
+            })
+
+        </script>  
+    </body>
+</html>

@@ -66,6 +66,17 @@ public class PetitionController {
 		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
 		return result;
 	}
+    
+    @ApiMethod(name = "Categorie", httpMethod = HttpMethod.GET)
+	public List<Entity> Categorie(Petition p) {
+		Filter keyFilter = new FilterPredicate("categorie", FilterOperator.EQUAL,p.categorie);
+        Query q = new Query("test").setFilter(keyFilter);
+
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		PreparedQuery pq = datastore.prepare(q);
+		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
+		return result;
+	}
 
 	@ApiMethod(name = "topscores", httpMethod = HttpMethod.GET)
 	public List<Entity> topscores() {
@@ -84,7 +95,7 @@ public class PetitionController {
 		e.setProperty("categorie", p.categorie);
 		e.setProperty("description", p.description);
 		e.setProperty("titre", p.titre);
-        e.setProperty("user", "Thierno");
+        e.setProperty("user", "Coco");
         e.setProperty("nbsignatures", p.nbsignatures);
 		
 
@@ -93,50 +104,18 @@ public class PetitionController {
 		return e;
 	}
 
-    
-	@ApiMethod(name = "getPost",
-		   httpMethod = ApiMethod.HttpMethod.GET)
-	public CollectionResponse<Entity> getPost(User user, @Nullable @Named("next") String cursorString)
-			throws UnauthorizedException {
+    @ApiMethod(name = "postUser", httpMethod = HttpMethod.POST)
+	public Entity postUser(UserClass u) {
 
-		if (user == null) {
-			throw new UnauthorizedException("Invalid credentials");
-		}
-
-		Query q = new Query("Post").
-		    setFilter(new FilterPredicate("owner", FilterOperator.EQUAL, user.getEmail()));
-
-		// Multiple projection require a composite index
-		// owner is automatically projected...
-		// q.addProjection(new PropertyProjection("body", String.class));
-		// q.addProjection(new PropertyProjection("date", java.util.Date.class));
-		// q.addProjection(new PropertyProjection("likec", Integer.class));
-		// q.addProjection(new PropertyProjection("url", String.class));
-
-		// looks like a good idea but...
-		// require a composite index
-		// - kind: Post
-		//  properties:
-		//  - name: owner
-		//  - name: date
-		//    direction: desc
-
-		// q.addSort("date", SortDirection.DESCENDING);
+		Entity e = new Entity("user"); // quelle est la clef ?? non specifié -> clef automatique
+		e.setProperty("name", u.name);
+		e.setProperty("email", u.email);
+        e.setProperty("signed", "");
+		
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		PreparedQuery pq = datastore.prepare(q);
-
-		FetchOptions fetchOptions = FetchOptions.Builder.withLimit(2);
-
-		if (cursorString != null) {
-			fetchOptions.startCursor(Cursor.fromWebSafeString(cursorString));
-		}
-
-		QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
-		cursorString = results.getCursor().toWebSafeString();
-
-		return CollectionResponse.<Entity>builder().setItems(results).setNextPageToken(cursorString).build();
+		datastore.put(e);
+		return e;
 	}
-
 	
 }
