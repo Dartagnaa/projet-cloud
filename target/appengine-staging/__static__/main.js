@@ -51,6 +51,11 @@ const User = {
         url: "_ah/api/myApi/v1/postUser",
         params: user
     })
+    .then(e => window.location = "/")
+    .catch(e => {
+        console.log(e);
+        alert("Erreur lors de l'enregistrement de l'utilisateur");
+    })
   },
 
   logout: () => {

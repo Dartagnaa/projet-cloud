@@ -14,6 +14,19 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import com.google.api.server.spi.auth.common.User;
+import com.google.api.server.spi.config.ApiMethod.HttpMethod;
+
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query.Filter;
 
 
 @Api(name = "myApi",
@@ -27,80 +40,34 @@ import java.util.List;
         packagePath = "")
 )
 
-    public class UserEndpoint {
+public class UserEndpoint {
 
 
-        // _ah/api/tinyInsta/v1/login
-        //Entrées: Objet UserClass
-        @ApiMethod(name = "logUser", path = "login", httpMethod = ApiMethod.HttpMethod.POST)
-        public Entity logUser(UserClass user) throws BadRequestException, UnauthorizedException {
-            if (user == null) {
-                throw new UnauthorizedException("Invalid credentials");
-            }
+    @ApiMethod(name = "postUser", httpMethod = HttpMethod.POST)
+	public Entity postUser(UserClass u) {
 
-            try{    //check if exists
-                return getUser(user.email);
-            }
-            catch(Exception e){
-                //create user if he doesn't exist
-                Entity e1 = new Entity("User", user.email);
-                e1.setProperty("email", user.email);
-                e1.setProperty("name", user.name);
-                e1.setProperty("signed", new ArrayList<String>());
+		Entity e = new Entity("user"); // quelle est la clef ?? non specifié -> clef automatique
+		e.setProperty("name", u.name);
+		e.setProperty("email", u.email);
+        e.setProperty("signed", "");
+		
 
-                DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-                Transaction txn = datastore.beginTransaction();
-                datastore.put(e1);
-                txn.commit();
-                return e1;
-            }
-            
-        }
-        
-        /**
-         * 
-         * @param userEmail Email de l'utilisateur dans l'endpoint
-         * @return
-         * @throws EntityNotFoundException
-         */
-        @ApiMethod(name="getUser", path = "user/{userEmail}", httpMethod = ApiMethod.HttpMethod.GET)
-        public static Entity getUser(@Named("userEmail") String userEmail) throws EntityNotFoundException {
-            Key userKey = KeyFactory.createKey("User", userEmail);
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		datastore.put(e);
+		return e;
+	}
 
-            DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    @ApiMethod(name = "signed", httpMethod = HttpMethod.POST)
+	public Entity postUser(UserClass u,Petition p) {
 
-            Entity e = datastore.get(userKey);
-            return e;
-        }
+		Entity e = new Entity("user"); // quelle est la clef ?? non specifié -> clef automatique
+		e.setProperty("name", u.name);
+		e.setProperty("email", u.email);
+        e.setProperty("signed", u.signed.add(p.titre));
+		
 
-        /**
-         * 
-         * @param userEmail Email de l'utilisateur dans l'endpoint
-         * @return
-         * @throws EntityNotFoundException
-         */
-        @ApiMethod(name="getUserInfos", path = "userInfos/{userEmail}", httpMethod = ApiMethod.HttpMethod.GET)
-        public static List<Entity> getUserInfos(@Named("userEmail") String userEmail) throws EntityNotFoundException {
-            DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-            
-            Query q = new Query("User").setFilter(new Query.FilterPredicate("email", Query.FilterOperator.EQUAL, userEmail));
-            PreparedQuery pq = datastore.prepare(q);
-            
-            List<Entity> results = pq.asList(FetchOptions.Builder.withLimit(1));
-            
-            return results;
-        }
-
-        //Entrées: Email du user dans l'endpoint
-        @ApiMethod(name="getUserPosts", path = "user/{userEmail}/posts", httpMethod = ApiMethod.HttpMethod.GET)
-        public List<Entity> getUserPosts(@Named("userEmail") String userEmail) throws EntityNotFoundException {
-            DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    
-            Query q = new Query("Post").setFilter(new Query.FilterPredicate("owner", Query.FilterOperator.EQUAL, userEmail));
-            PreparedQuery pq = datastore.prepare(q);
-    
-            List<Entity> results = pq.asList(FetchOptions.Builder.withLimit(20));
-    
-            return results;
-        }        
-    }
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		datastore.put(e);
+		return e;
+	} 
+}

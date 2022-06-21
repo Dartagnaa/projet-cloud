@@ -78,17 +78,6 @@ public class PetitionController {
 		return result;
 	}
 
-    @ApiMethod(name = "User", httpMethod = HttpMethod.GET)
-	public List<Entity> User(Petition p) {
-		Filter keyFilter = new FilterPredicate("user", FilterOperator.EQUAL,p.user);
-        Query q = new Query("test").setFilter(keyFilter);
-
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
-		return result;
-	}
-
 	@ApiMethod(name = "topscores", httpMethod = HttpMethod.GET)
 	public List<Entity> topscores() {
 		Query q = new Query("Score").addSort("score", SortDirection.DESCENDING);
@@ -128,34 +117,5 @@ public class PetitionController {
 		datastore.put(e);
 		return e;
 	}
-
-    
-	@ApiMethod(name = "getPost",
-		   httpMethod = ApiMethod.HttpMethod.GET)
-	public CollectionResponse<Entity> getPost(User user, @Nullable @Named("next") String cursorString)
-			throws UnauthorizedException {
-
-		if (user == null) {
-			throw new UnauthorizedException("Invalid credentials");
-		}
-
-		Query q = new Query("Post").
-		    setFilter(new FilterPredicate("owner", FilterOperator.EQUAL, user.getEmail()));
-
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		PreparedQuery pq = datastore.prepare(q);
-
-		FetchOptions fetchOptions = FetchOptions.Builder.withLimit(2);
-
-		if (cursorString != null) {
-			fetchOptions.startCursor(Cursor.fromWebSafeString(cursorString));
-		}
-
-		QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
-		cursorString = results.getCursor().toWebSafeString();
-
-		return CollectionResponse.<Entity>builder().setItems(results).setNextPageToken(cursorString).build();
-	}
-
 	
 }
