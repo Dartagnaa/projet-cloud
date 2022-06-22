@@ -23,4 +23,3 @@ mvn appengine:run
 )
 ```
 mvn appengine:deploy
-```
