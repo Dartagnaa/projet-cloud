@@ -56,18 +56,4 @@ public class UserEndpoint {
 		datastore.put(e);
 		return e;
 	}
-
-    @ApiMethod(name = "signed", httpMethod = HttpMethod.POST)
-	public Entity postUser(UserClass u,Petition p) {
-
-		Entity e = new Entity("user"); // quelle est la clef ?? non specifié -> clef automatique
-		e.setProperty("name", u.name);
-		e.setProperty("email", u.email);
-        e.setProperty("signed", u.signed.add(p.titre));
-		
-
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		datastore.put(e);
-		return e;
-	} 
 }
