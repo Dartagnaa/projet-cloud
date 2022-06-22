@@ -102,6 +102,5 @@ function formatDate(date) {
 
 // // Si l'utilisateur n'est pas connecté
 if (!isUserConnected() && window.location.pathname !== "/glogin.html") {
-    console.log("oui1");
     window.location = "/glogin.html";
 }

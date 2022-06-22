@@ -3,6 +3,7 @@ package foo;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import com.google.api.server.spi.auth.common.User;
@@ -70,15 +71,43 @@ public class PetitionController {
 		return result;
 	}
     
-    @ApiMethod(name = "Categorie", httpMethod = HttpMethod.GET)
-	public List<Entity> Categorie(Petition p) {
-		Filter keyFilter = new FilterPredicate("categorie", FilterOperator.EQUAL,p.categorie);
-        Query q = new Query("test").setFilter(keyFilter);
+    @ApiMethod(name = "mySignature", httpMethod = HttpMethod.GET)
+	public List<Entity> mySignature(UserClass u) {
 
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
-		return result;
+        String user = u.email;
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        
+        Key userKey = new Entity("user", user).getKey();
+        Filter keyUserFilter = new FilterPredicate("_key_", FilterOperator.EQUAL, userKey);
+        Query qu = new Query("user").setFilter(keyUserFilter);
+
+        PreparedQuery pq1 = datastore.prepare(qu);
+        List<Entity> result = pq1.asList(FetchOptions.Builder.withDefaults());
+        
+        Entity u1 = new Entity("user");
+        List<Entity> result1 = new ArrayList<Entity>();
+
+        if(result.size() == 0) {
+            try{
+                u1 = datastore.get(userKey);
+            }catch (EntityNotFoundException err) {
+                    err.printStackTrace();
+                }
+
+            String pet = u1.getProperty("signed").toString();
+            String[] list = pet.split(" ");  
+
+            
+            for (String id : list) {
+                Key petitionKey = new Entity("test", id).getKey();
+                Filter keyFilter = new FilterPredicate("_key_", FilterOperator.EQUAL, petitionKey);
+                Query q = new Query("test").setFilter(keyFilter);
+            
+                PreparedQuery pq = datastore.prepare(q);
+                result1.addAll(pq.asList(FetchOptions.Builder.withDefaults()));
+            }
+        }		
+		return result1;
 	}
 
 	@ApiMethod(name = "postPetition", httpMethod = HttpMethod.POST)
@@ -101,45 +130,70 @@ public class PetitionController {
     @ApiMethod(name = "postUser", httpMethod = HttpMethod.POST)
 	public Entity postUser(UserClass u) {
 
-		Entity e = new Entity("user"); // quelle est la clef ?? non specifié -> clef automatique
-		e.setProperty("name", u.name);
-		e.setProperty("email", u.email);
-        e.setProperty("signed", "");
-		
-
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		datastore.put(e);
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        Filter keyFilter = new FilterPredicate("email", FilterOperator.EQUAL, u.email);
+        Query q = new Query("user").setFilter(keyFilter);
+    
+        PreparedQuery pq = datastore.prepare(q);
+        List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
+        Entity e = new Entity("user",u.email);     
+        
+        if(result.size() == 0) {
+            e.setProperty("name", u.name);
+            e.setProperty("email", u.email);
+            e.setProperty("signed", "");
+            datastore.put(e);
+        }
 		return e;
+		
 	}
 
     //Signer une petition
     @ApiMethod(name = "signp", httpMethod = HttpMethod.POST)
     public Entity signp(Petition p ) throws UnauthorizedException {
+        Entity response = new Entity("Response");
+        if(p.user !=""){
+            String user = p.user;
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
             
+            Key userKey = new Entity("user", user).getKey();
+            Filter keyUserFilter = new FilterPredicate("_key_", FilterOperator.EQUAL, userKey);
+            Query qu = new Query("user").setFilter(keyUserFilter);
+
+            PreparedQuery pq1 = datastore.prepare(qu);
+            List<Entity> result1 = pq1.asList(FetchOptions.Builder.withDefaults());
+
+            Entity u1 = new Entity("user");
+
             Key petitionKey = new Entity("test", p.id).getKey();
             Filter keyFilter = new FilterPredicate("_key_", FilterOperator.EQUAL, petitionKey);
             Query q = new Query("test").setFilter(keyFilter);
-    
+        
             PreparedQuery pq = datastore.prepare(q);
             List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
-          
-            Entity response = new Entity("Response");
+                    
+
             Entity e = new Entity("test");
+                        
             
-            
-            if(result.size() == 0) {
+            if(result.size() == 0 && result1.size() == 0) {
                 Transaction txn = datastore.beginTransaction();
                 try{
                     e = datastore.get(petitionKey);
+                    u1 = datastore.get(userKey);
                 }catch (EntityNotFoundException err) {
                         err.printStackTrace();
-                    }              
-                
-                
-                long nbSignataire = (long) e.getProperty("nbsignatures");
-                nbSignataire ++;
-                e.setProperty("nbsignatures", nbSignataire);
+                    }
+                String s = u1.getProperty("signed").toString();
+                s=s+" "+p.id;
+
+                u1.setProperty("signed", s);
+                datastore.put(u1); 
+
+
+                long nbsignatures = (long) e.getProperty("nbsignatures");
+                nbsignatures ++;
+                e.setProperty("nbsignatures", nbsignatures);
                 
                 datastore.put(e);
                 txn.commit();
@@ -149,6 +203,10 @@ public class PetitionController {
                 response.setProperty("status", "nok");
                 return response;
             }
+        }else{
+            response.setProperty("status", "nok");
+            return response;
+        }
             
             
     }

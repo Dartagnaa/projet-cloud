@@ -5,7 +5,7 @@ derived_file_type:
 - java_precompiled
 auto_id_policy: default
 beta_settings:
-  'source_reference': 'https://github.com/Dartagnaa/projet-cloud.git#cbf2c0ca431ec660b147d4bf8cde9644f843f650'
+  'source_reference': 'https://github.com/Dartagnaa/projet-cloud.git#e7b9161ebbea18d955b0a6f5f2706a96a890188c'
 env_variables:
   'ENDPOINTS_SERVICE_NAME': 'ocmaco.appspot.com'
 api_version: 'user_defined'

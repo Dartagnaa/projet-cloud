@@ -3,16 +3,21 @@
     <head>
         <meta http-equiv="content-type"
             content="application/xhtml+xml; charset=UTF-8" />
+        <meta name="google-signin-scope" content="profile email">
+        <meta name="google-signin-client_id" content="448601331771-9pfrlvj1pgcnr8jdsrsil9c0bjcbpq92.apps.googleusercontent.com">
+        <meta name="google-signin-plugin_name" content="stop bugging me">
         <title>OCMACO pétitions</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
         <script src="https://unpkg.com/mithril/mithril.js"></script>
     </head>
     <body>
+        <script src="main.js" defer></script>
         <script>
             var Variable = {
                 petitions: [],
                 toppetitions : [],
                 list: [],
+                signed: [],
                 titre:"",
                 description:"",
                 categorie:"",
@@ -33,7 +38,22 @@
                     })
                     .then(function(result) {
                         Variable.toppetitions = result.items
+                    })
+                },
+                mySign: function() {
+                    console.log("mySign")
+                    console.log(sessionStorage.user.split("\"")[3])
+                    var user = {
+                        email: sessionStorage.user.split("\"")[3]
+                    }
+                    return m.request({
+                        method: "GET",
+                        url: "_ah/api/myApi/v1/mySignature",
+                        params: user
+                    })
+                    .then(function(result) {
                         console.log(result)
+                        Variable.signed = result.items
                     })
                 },
                 savePetiton: function() {
@@ -55,9 +75,10 @@
                         
                 },
                 sign: function(id) {
-                    console.log("sign id:"+id)
+                    console.log(sessionStorage.user.split("\"")[3])
                     var pet = {
-                        id: id
+                        id: id,
+                        user: sessionStorage.user.split("\"")[3]
                     }
                     return m.request({
                         method: "post",
@@ -87,6 +108,9 @@
                                     ]),
                                     m('li', {class: "nav-item "}, [
                                         m(m.route.Link, {href: "/top", class: "nav-link"}, "Top pétitions")
+                                    ]),
+                                    m('li', {class: "nav-item "}, [
+                                        m(m.route.Link, {href: "/moncompte", class: "nav-link"}, "Mon compte")
                                     ])
                                 ])
                             ])    
@@ -115,7 +139,13 @@
                                 m("div", {class: "row"}, [
                                     m("div", {class: "col-9"}, [
                                         m("h5", {class: "text-justify"}, item.properties.titre),
-                                        m("p",{class: "text-justify"},item.properties.categorie) 
+                                        m("p",{class: "text-justify"},item.properties.categorie),
+                                        m("p",{class: "text-justify"},item.properties.description),
+                                        m("p",{class: "text-justify"},"Nomblre de signatures : "+item.properties.nbsignatures),
+                                        m("button", {onclick: function(e) {
+                                                Variable.sign(item.key.name)
+                                            }                                            
+                                        }, "Signer") 
                                     ])
                                 ])
                             ])
@@ -135,11 +165,32 @@
                                     m("div", {class: "col-9"}, [
                                         m("h5", {class: "text-justify"}, item.properties.titre),
                                         m("p",{class: "text-justify"},item.properties.categorie),
-                                        m("p",{class: "text-justify"},item.properties.nbsignatures),
+                                        m("p",{class: "text-justify"},item.properties.description),
+                                        m("p",{class: "text-justify"},"Nomblre de signatures : "+item.properties.nbsignatures),
                                         m("button", {onclick: function(e) {
                                                 Variable.sign(item.key.name)
                                             }                                            
                                         }, "Signer")
+                                    ])
+                                ])
+                            ])
+                        ])
+                    }))      
+                }
+            }
+
+            var ListePetSigned = {
+                oninit: Variable.mySign(),
+                view: function () {
+                    return m("div",  Variable.signed.map(function (item) {
+                        return m("div", {class: "row", style: "margin-top: 25px"},[
+                            m("div",{class: "card col-6 offset-3"}, [
+                                m("div", {class: "row"}, [
+                                    m("div", {class: "col-9"}, [
+                                        m("h5", {class: "text-justify"}, item.properties.titre),
+                                        m("p",{class: "text-justify"},item.properties.categorie),
+                                        m("p",{class: "text-justify"},item.properties.description),
+                                        m("p",{class: "text-justify"},"Nomblre de signatures : "+item.properties.nbsignatures)
                                     ])
                                 ])
                             ])
@@ -201,6 +252,7 @@
                 view: function() {
                     return m("div", [
                         m(navBar),
+                        console.log("coucou "+sessionStorage.getItem("user")),
                         m("div", {style: "margin: 5px"}, [
                         m("h3",{style:"text-align:center"},"Bienvenue sur OCMACO"),
                         m("br"),
@@ -225,11 +277,25 @@
                     ])
                 }
             }
-
+            //Page mon compte
+            var pageMonCompte = {
+                view: function() {
+                    return m("div", [
+                        m(navBar),
+                        m("div", {style: "margin: 5px"}, [
+                        m("h3",{style:"text-align:center"},"Bienvenue sur votre compte"),
+                        m("br"),
+                        m("p",{style:"text-align:center"},"Vous pouvez visionner ici les pétitions que vous avez signés."),
+                        m("br"),
+                        m(ListePetSigned)])
+                    ])
+                }
+            }
             m.route(document.body, "/", {
                 "/": pageAccueil,
                 "/create_petition": formPetition,
-                "/top":topPetition
+                "/top":topPetition,
+                "/moncompte":pageMonCompte
             })
 
         </script>  
