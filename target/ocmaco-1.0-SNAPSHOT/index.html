@@ -66,12 +66,6 @@
                     })
                     .then(function(result) {
                         console.log("got:",result)
-                        if(result.key.name == "false"){
-                            alert("Vous venez de signer la pétition");
-                        }
-                        else{
-                            alert("Vous avez déjà signé cette pétition");
-                        }
                     })
                         
                 }
@@ -143,7 +137,7 @@
                                         m("p",{class: "text-justify"},item.properties.categorie),
                                         m("p",{class: "text-justify"},item.properties.nbsignatures),
                                         m("button", {onclick: function(e) {
-                                                Variable.sign(item.key.id)
+                                                Variable.sign(item.key.name)
                                             }                                            
                                         }, "Signer")
                                     ])

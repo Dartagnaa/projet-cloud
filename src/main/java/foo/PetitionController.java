@@ -83,8 +83,9 @@ public class PetitionController {
 
 	@ApiMethod(name = "postPetition", httpMethod = HttpMethod.POST)
 	public Entity postPetition(Petition p) {
-
-		Entity e = new Entity("test"); // quelle est la clef ?? non specifié -> clef automatique
+        Random r = new Random();
+		int k = r.nextInt(50000);
+		Entity e = new Entity("test", Long.MAX_VALUE-(new Date()).getTime()+":"+k);
 		e.setProperty("categorie", p.categorie);
 		e.setProperty("description", p.description);
 		e.setProperty("titre", p.titre);
@@ -114,44 +115,6 @@ public class PetitionController {
     //Signer une petition
     @ApiMethod(name = "signp", httpMethod = HttpMethod.POST)
     public Entity signp(Petition p ) throws UnauthorizedException {
-        /*
-        //if (user == null) {
-				//throw new UnauthorizedException("Invalid credentials");
-        //    }
-        Entity isPetitionSign = new Entity("Petition","true");
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-
-        Key pkey = KeyFactory.createKey("test", "Océane");
-        //Key ukey = KeyFactory.createKey("user", user.getEmail());
-        Entity ent = new Entity("test","hello");
-        //Entity util = new Entity("user");
-        Transaction txn=datastore.beginTransaction();
-
-        try {
-				ent = datastore.get(pkey);
-               //util = datastore.get(ukey);
-				int nb =  Integer.parseInt(ent.getProperty("nbsignatures").toString());
-			    //ArrayList<String> signatories = (ArrayList<String>) util.getProperty("signed"); //récupération des signature de l'utilisateur.
-
-			    //if(!signatories.contains(ent.getProperty("id").toString())) {
-			    //	signatories.add(ent.getProperty("id").toString());
-				    ent.setProperty("nbsignatures", nb + 1 );
-                //    util.setProperty("signed", signatories );
-				//    isPetitionSign = new Entity("Petition","false");
-				//   }
-				datastore.put(ent);
-                //datastore.put(util);
-				txn.commit();
-			} catch (EntityNotFoundException e) {
-					e.printStackTrace();
-				}
-			  finally {
-				if (txn.isActive()) {
-				    txn.rollback();
-				  }
-			}
-			return ent;
-            */
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
             
             Key petitionKey = new Entity("test", p.id).getKey();
@@ -163,7 +126,8 @@ public class PetitionController {
           
             Entity response = new Entity("Response");
             Entity e = new Entity("test");
-
+            
+            
             if(result.size() == 0) {
                 Transaction txn = datastore.beginTransaction();
                 try{
@@ -171,11 +135,13 @@ public class PetitionController {
                 }catch (EntityNotFoundException err) {
                         err.printStackTrace();
                     }              
-    
-                long nbSignataire = (long) e.getProperty("nombreSignature");
+                
+                
+                long nbSignataire = (long) e.getProperty("nbsignatures");
                 nbSignataire ++;
-                e.setProperty("nombreSignature", nbSignataire);
-                datastore.put(e); 
+                e.setProperty("nbsignatures", nbSignataire);
+                
+                datastore.put(e);
                 txn.commit();
                 response.setProperty("status", "ok");
                 return e;
@@ -183,6 +149,7 @@ public class PetitionController {
                 response.setProperty("status", "nok");
                 return response;
             }
+            
             
     }
 	
