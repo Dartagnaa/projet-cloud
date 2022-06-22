@@ -8,6 +8,7 @@
         <script src="https://unpkg.com/mithril/mithril.js"></script>
     </head>
     <body>
+        <script src="main.js" defer></script>
         <script>
             var Variable = {
                 petitions: [],
@@ -38,12 +39,6 @@
                 },
                 savePetiton: function() {
                     var data = {
-                        titre: "Petition 1",
-                        description: "Desc peee",
-                        categorie: "cat 1",
-                           nbsignatures: 1
-                    }
-                    var data2 = {
                         titre: Variable.titre,
                         description: Variable.description,
                         categorie: Variable.categorie,
@@ -55,17 +50,8 @@
                         params: data
                     })
                     .then(function(result) {
-                        console.log(data2)
-                        return m.request({
-                            method: "post",
-                            url: "_ah/api/myApi/v1/postPetition",
-                            params: data2
-                        })
-                    })
-                    .then(function(result) {
                         console.log(result)
                         Variable.loadList()
-                        Variable.top()
                     })
                         
                 }
@@ -87,6 +73,9 @@
                                     ]),
                                     m('li', {class: "nav-item "}, [
                                         m(m.route.Link, {href: "/top", class: "nav-link"}, "Top pétitions")
+                                    ]),
+                                    m('li', {class: "nav-item "}, [
+                                        m(m.route.Link, {href: "/moncompte", class: "nav-link"}, "Mon compte")
                                     ])
                                 ])
                             ])    
@@ -99,9 +88,9 @@
                 view: function() {
                     return m("button", {
                         onclick: function(e) {
-                            m("p","coucou")
-                        }
-                    }, "clique1")
+                            console.log("coucou")
+                        },style:"btn btn-primary"
+                    }, "Signer")
                 }
             }
 
@@ -114,8 +103,9 @@
                             m("div",{class: "card col-6 offset-3"}, [
                                 m("div", {class: "row"}, [
                                     m("div", {class: "col-9"}, [
-                                        m("h5", {class: "text-justify"}, item.properties.titre),
-                                        m("p",{class: "text-justify"},item.properties.categorie) 
+                                        m("h5", {class: "text-justify",style:"text-align:center"}, item.properties.titre),
+                                        m("p",{class: "text-justify"},item.properties.categorie),
+                                        m(essai)
                                     ])
                                 ])
                             ])
@@ -133,8 +123,9 @@
                             m("div",{class: "card col-6 offset-3"}, [
                                 m("div", {class: "row"}, [
                                     m("div", {class: "col-9"}, [
-                                        m("h5", {class: "text-justify"}, item.properties.titre),
-                                        m("p",{class: "text-justify"},item.properties.categorie) 
+                                        m("h5", {class: "text-justify", style:"text-align:center"}, item.properties.titre),
+                                        m("p",{class: "text-justify"},item.properties.categorie),
+                                        m(essai)
                                     ])
                                 ])
                             ])
@@ -197,6 +188,7 @@
                     return m("div", [
                         m(navBar),
                         m("div", {style: "margin: 5px"}, [
+                        m("br"),
                         m("h3",{style:"text-align:center"},"Bienvenue sur OCMACO"),
                         m("br"),
                         m("p",{style:"text-align:center"},"Vous retrouvez ici toutes les pétitions qui nous tiennent à coeur. Vous pouvez les visualiser et les signer."),
@@ -221,10 +213,26 @@
                 }
             }
 
+            //Page mon compte
+            var pageMonCompte = {
+                view: function() {
+                    return m("div", [
+                        m(navBar),
+                        m("div", {style: "margin: 5px"}, [
+                        m("h3",{style:"text-align:center"},"Bienvenue sur votre compte"),
+                        m("br"),
+                        m("p",{style:"text-align:center"},"Vous pouvez visionner ici les pétitions que vous avez signés."),
+                        m("br"),
+                        m(listePetitionsTop)])
+                    ])
+                }
+            }
+
             m.route(document.body, "/", {
                 "/": pageAccueil,
                 "/create_petition": formPetition,
-                "/top":topPetition
+                "/top":topPetition,
+                "/moncompte":pageMonCompte
             })
 
         </script>  

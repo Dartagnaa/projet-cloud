@@ -1,27 +1,49 @@
 <html lang="en">
   <head>
     <meta name="google-signin-scope" content="profile email">
-    <meta name="google-signin-client_id" content="927375242383-t21v9ml38tkh2pr30m4hqiflkl3jfohl.apps.googleusercontent.com">
+    <meta name="google-signin-client_id" content="448601331771-9pfrlvj1pgcnr8jdsrsil9c0bjcbpq92.apps.googleusercontent.com">
+    <meta name="google-signin-plugin_name" content="stop bugging me">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
     <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/mithril/mithril.js"></script>
   </head>
-  <body>
-    <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
-    <script>
-      function onSignIn(googleUser) {
-        // Useful data for your client-side scripts:
-        var profile = googleUser.getBasicProfile();
-        console.log("ID: " + profile.getId()); // Don't send this directly to your server!
-        console.log('Full Name: ' + profile.getName());
-        console.log('Given Name: ' + profile.getGivenName());
-        console.log('Family Name: ' + profile.getFamilyName());
-        console.log("Image URL: " + profile.getImageUrl());
-        console.log("Email: " + profile.getEmail());
-
-        // The ID token you need to pass to your backend:
-        var id_token = googleUser.getAuthResponse().id_token;
-        console.log("ID Token: " + id_token);
-      }
+  
+<body style="background-color: antiquewhite;">
+    <script src="main.js" defer></script>
+    <script defer>
+        function onSignIn(googleUser) {
+          User.login(googleUser);
+        }
+  
+        function signOut() {
+          User.logout();
+        }
     </script>
+
+    <!-- Bannière d'en-tête -->
+    <div class="border-b-2 p-2 flex items-center bg-white shadow-md">
+        <div class="p-2 cursor-pointer hover:shadow hover:border bg-blue-500 text-white rounded font-medium hover:bg-blue-400">
+            <a href="user.html">Mon Compte</a>
+        </div>
+    </div>
+
+    <div>
+      
+      <!-- Connexion -->
+      <div style="margin-top:100px">
+        <!-- Texte d'en-tête -->
+        <div>
+            <div class="text-gray-600 text-xl mb-4" style="margin-left:520px">Connectez-vous avec Google :</div>
+            
+            <!-- Bouton Google -->
+            <div >
+              <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"  style="margin-left:560px"></div>
+            </div>
+        </div>
+      </div>
+      
+    </div>
   </body>
 </html>
 
