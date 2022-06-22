@@ -2,6 +2,7 @@ package foo;
 
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Random;
 
 import com.google.api.server.spi.auth.common.User;
@@ -33,6 +34,8 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 
 @Api(name = "myApi",
      version = "v1",
@@ -78,16 +81,6 @@ public class PetitionController {
 		return result;
 	}
 
-	@ApiMethod(name = "topscores", httpMethod = HttpMethod.GET)
-	public List<Entity> topscores() {
-		Query q = new Query("Score").addSort("score", SortDirection.DESCENDING);
-
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(10));
-		return result;
-	}
-
 	@ApiMethod(name = "postPetition", httpMethod = HttpMethod.POST)
 	public Entity postPetition(Petition p) {
 
@@ -117,5 +110,80 @@ public class PetitionController {
 		datastore.put(e);
 		return e;
 	}
+
+    //Signer une petition
+    @ApiMethod(name = "signp", httpMethod = HttpMethod.POST)
+    public Entity signp(Petition p ) throws UnauthorizedException {
+        /*
+        //if (user == null) {
+				//throw new UnauthorizedException("Invalid credentials");
+        //    }
+        Entity isPetitionSign = new Entity("Petition","true");
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+        Key pkey = KeyFactory.createKey("test", "Océane");
+        //Key ukey = KeyFactory.createKey("user", user.getEmail());
+        Entity ent = new Entity("test","hello");
+        //Entity util = new Entity("user");
+        Transaction txn=datastore.beginTransaction();
+
+        try {
+				ent = datastore.get(pkey);
+               //util = datastore.get(ukey);
+				int nb =  Integer.parseInt(ent.getProperty("nbsignatures").toString());
+			    //ArrayList<String> signatories = (ArrayList<String>) util.getProperty("signed"); //récupération des signature de l'utilisateur.
+
+			    //if(!signatories.contains(ent.getProperty("id").toString())) {
+			    //	signatories.add(ent.getProperty("id").toString());
+				    ent.setProperty("nbsignatures", nb + 1 );
+                //    util.setProperty("signed", signatories );
+				//    isPetitionSign = new Entity("Petition","false");
+				//   }
+				datastore.put(ent);
+                //datastore.put(util);
+				txn.commit();
+			} catch (EntityNotFoundException e) {
+					e.printStackTrace();
+				}
+			  finally {
+				if (txn.isActive()) {
+				    txn.rollback();
+				  }
+			}
+			return ent;
+            */
+            DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+            
+            Key petitionKey = new Entity("test", p.id).getKey();
+            Filter keyFilter = new FilterPredicate("_key_", FilterOperator.EQUAL, petitionKey);
+            Query q = new Query("test").setFilter(keyFilter);
+    
+            PreparedQuery pq = datastore.prepare(q);
+            List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
+          
+            Entity response = new Entity("Response");
+            Entity e = new Entity("test");
+
+            if(result.size() == 0) {
+                Transaction txn = datastore.beginTransaction();
+                try{
+                    e = datastore.get(petitionKey);
+                }catch (EntityNotFoundException err) {
+                        err.printStackTrace();
+                    }              
+    
+                long nbSignataire = (long) e.getProperty("nombreSignature");
+                nbSignataire ++;
+                e.setProperty("nombreSignature", nbSignataire);
+                datastore.put(e); 
+                txn.commit();
+                response.setProperty("status", "ok");
+                return e;
+            }else {
+                response.setProperty("status", "nok");
+                return response;
+            }
+            
+    }
 	
 }

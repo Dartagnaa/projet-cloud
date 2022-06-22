@@ -8,7 +8,6 @@
         <script src="https://unpkg.com/mithril/mithril.js"></script>
     </head>
     <body>
-        <script src="main.js" defer></script>
         <script>
             var Variable = {
                 petitions: [],
@@ -52,6 +51,27 @@
                     .then(function(result) {
                         console.log(result)
                         Variable.loadList()
+                    })
+                        
+                },
+                sign: function(id) {
+                    console.log("sign id:"+id)
+                    var pet = {
+                        id: id
+                    }
+                    return m.request({
+                        method: "post",
+                        url: "_ah/api/myApi/v1/signp",
+                        params: pet
+                    })
+                    .then(function(result) {
+                        console.log("got:",result)
+                        if(result.key.name == "false"){
+                            alert("Vous venez de signer la pétition");
+                        }
+                        else{
+                            alert("Vous avez déjà signé cette pétition");
+                        }
                     })
                         
                 }
@@ -120,7 +140,12 @@
                                 m("div", {class: "row"}, [
                                     m("div", {class: "col-9"}, [
                                         m("h5", {class: "text-justify"}, item.properties.titre),
-                                        m("p",{class: "text-justify"},item.properties.categorie) 
+                                        m("p",{class: "text-justify"},item.properties.categorie),
+                                        m("p",{class: "text-justify"},item.properties.nbsignatures),
+                                        m("button", {onclick: function(e) {
+                                                Variable.sign(item.key.id)
+                                            }                                            
+                                        }, "Signer")
                                     ])
                                 ])
                             ])
